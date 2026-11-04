@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#09090f"><title>PicUp 0.2.1 — Fix</title>
+<meta name="theme-color" content="#09090f"><title>PicUp 0.3.0 — Player</title>
 <style>
 :root{color-scheme:dark;--bg:#09090f;--panel:#14141e;--line:#302d42;--txt:#f7f4ff;--muted:#aaa4bc;--purple:#b69aff;--pink:#e879f9}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 85% 0%,#48236a55,transparent 40%),var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
@@ -24,21 +24,32 @@ h2{font-size:30px;margin:6px 0}.sub,.muted{font-size:12px;color:var(--muted)}.ey
 .toast{position:fixed;z-index:30;left:50%;bottom:100px;transform:translateX(-50%);background:#302744;border:1px solid #76609d;padding:10px 14px;border-radius:12px;font-size:12px;opacity:0;pointer-events:none;transition:.2s;max-width:90vw;text-align:center}.toast.show{opacity:1}
 @media(max-width:680px){.app{padding:12px 12px 145px}.layout{grid-template-columns:1fr}aside,main{padding:14px}.playlists{display:flex;overflow-x:auto}.pl{width:auto;white-space:nowrap;flex-shrink:0}.add{grid-template-columns:1fr}.add button{width:100%}.track{grid-template-columns:44px minmax(0,1fr) auto auto}.track img{width:44px;height:40px}.playerin{align-items:center}.controls button{padding:9px 10px}.recs{grid-template-columns:1fr 1fr}}
 @media(max-width:380px){.recs{grid-template-columns:1fr}.version{display:none}}
+
+.audio-add{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0}.audio-add input{display:none}.file-label{display:inline-block;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#242235;cursor:pointer;font-weight:650}
+.playerin{display:grid;grid-template-columns:minmax(100px,1fr) minmax(170px,1.5fr) minmax(80px,1fr);gap:10px;align-items:center}
+.now-art{width:40px;height:40px;display:grid;place-items:center;border-radius:9px;background:linear-gradient(135deg,#7652a8,#d36cce);font-size:22px;flex:none}
+.player-center{display:grid;gap:5px;min-width:0}.transport{display:flex;justify-content:center;align-items:center;gap:7px}.transport button{padding:6px 9px}.transport .main-play{border-radius:50%;width:36px;height:36px;padding:0}
+.progress-row{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--muted)}.progress-row input{padding:0;height:4px;accent-color:var(--purple)}.progress-row input[type=range]{flex:1;min-width:20px}
+.player-extra{display:flex;align-items:center;justify-content:flex-end;gap:7px}.player-extra button{padding:7px}.player-extra input{width:65px;padding:0;height:4px;accent-color:var(--purple)}.active-mode{border-color:var(--purple)!important;color:var(--purple)!important;background:#302544!important}
+@media(max-width:680px){.playerin{grid-template-columns:minmax(0,1fr) auto;gap:6px}.player-center{grid-column:1/-1;grid-row:2}.now{grid-column:1;grid-row:1}.player-extra{grid-column:2;grid-row:1}.player-extra input{display:none}.transport{gap:10px}}
 </style>
 </head>
 <body>
 <div class="app">
-<header><div class="brand"><div class="logo">P</div><div><h1>PICUP</h1><div class="tag">TU MÚSICA, TUS PLAYLISTS</div></div></div><span class="version">BETA 0.2.1 · FIX</span></header>
+<header><div class="brand"><div class="logo">P</div><div><h1>PICUP</h1><div class="tag">TU MÚSICA, TUS PLAYLISTS</div></div></div><span class="version">BETA 0.3.0 · PLAYER</span></header>
 <div class="layout">
 <aside><div class="label">TU BIBLIOTECA</div><button class="primary wide" id="create">＋ Crear playlist</button><div class="playlists" id="playlists"></div><p class="note">Las listas se guardan en este navegador y dispositivo.</p></aside>
 <main>
 <div class="eyebrow">TU ESPACIO MUSICAL</div><h2 id="listTitle">Mi playlist</h2><p class="sub" id="listSub">Añade videos y música de YouTube.</p>
-<form class="add" id="addForm"><input id="url" type="url" placeholder="Pega un enlace de YouTube…" required><button class="primary" type="submit">＋ Añadir video</button></form>
+<form class="add" id="addForm"><input id="url" type="url" placeholder="Pega un enlace de YouTube…" required><button class="primary" type="submit">＋ Añadir video</button></form><div class="audio-add"><label class="file-label" for="audioFiles">＋ Añadir archivos de audio</label><input id="audioFiles" type="file" accept="audio/*" multiple><span class="note">Importa archivos de audio desde tu dispositivo.</span></div>
 <div class="head"><h3>Tu música</h3><span class="muted" id="count">0 canciones</span></div><div class="tracks" id="tracks"></div><div class="head"><h3>Reproductor de video</h3><span class="muted">YouTube</span></div><div class="video-box"><div class="video-frame"><div id="ytplayer"></div></div><div class="video-hint" id="videoHint">El video aparecerá aquí cuando elijas una canción.</div></div>
 <div class="head"><h3>Descubre música</h3><span class="muted">Ideas para buscar</span></div><div class="recs" id="recs"></div>
 <p class="note">Las recomendaciones abren YouTube para que elijas el video. PicUp utiliza el reproductor oficial de YouTube; algunos videos no permiten reproducción insertada.</p>
 </main></div></div>
-<div class="player"><div class="playerin"><div class="now"><b id="nowTitle">Elige una canción</b><span id="nowStatus">PicUp · Reproductor de YouTube</span></div><div class="controls"><button id="prev">⏮</button><button class="primary" id="toggle">▶ Reproducir</button><button id="next">⏭</button></div></div></div>
+<div class="player"><div class="playerin">
+<div class="now"><div class="now-art">♫</div><div><b id="nowTitle">Elige una canción</b><span id="nowStatus">PicUp · Tu reproductor</span></div></div>
+<div class="player-center"><div class="transport"><button id="shuffle">🔀</button><button id="prev">⏮</button><button class="primary main-play" id="toggle">▶</button><button id="next">⏭</button><button id="repeat">🔁</button></div><div class="progress-row"><span id="elapsed">0:00</span><input id="seek" type="range" min="0" max="1000" value="0"><span id="duration">0:00</span></div></div>
+<div class="player-extra"><button id="favorite">♡</button><span>🔊</span><input id="volume" type="range" min="0" max="1" step=".01" value=".8"></div></div></div><audio id="audio" preload="metadata"></audio>
 <div class="modal" id="modal"><form class="dialog" id="createForm"><h3>Nueva playlist</h3><input id="playlistName" maxlength="36" placeholder="Ej. Mis temazos" required><div class="dialog-actions"><button type="button" id="cancel">Cancelar</button><button class="primary" type="submit">Crear</button></div></form></div>
 <div class="toast" id="toast"></div>
 <script>
@@ -49,6 +60,7 @@ let data;
 try { data=JSON.parse(localStorage.getItem(KEY)) || starter; } catch(e) { data=starter; }
 if(!data || !Array.isArray(data.playlists) || !data.playlists.length) data=starter;
 if(!data.playlists.some(p=>p.id===data.active)) data.active=data.playlists[0].id;
+if(!data.playlists.some(p=>p.id==='favorites')) data.playlists.push({id:'favorites',name:'♡ Favoritos',tracks:[]});
 let current=-1, player=null, playerReady=false, toastTimer=null;
 const $=id=>document.getElementById(id);
 const active=()=>data.playlists.find(p=>p.id===data.active)||data.playlists[0];
@@ -82,10 +94,10 @@ function render(){
  if(!p.tracks.length){const e=document.createElement('div');e.className='empty';const b=document.createElement('b');b.textContent='Tu playlist está vacía 🎧';e.append(b,document.createTextNode('Pega un enlace de YouTube arriba para añadir un video.'));list.append(e);}
  p.tracks.forEach((t,i)=>{
   const row=document.createElement('div');row.className='track'+(i===current?' active':'');
-  const img=document.createElement('img');img.src='https://i.ytimg.com/vi/'+t.id+'/mqdefault.jpg';img.alt='Miniatura de YouTube';
-  const info=document.createElement('div');const title=document.createElement('div');title.className='title';title.textContent=t.title||'Video de YouTube';const small=document.createElement('small');small.textContent='YouTube';info.append(title,small);
+  const img=document.createElement('img');if(t.type==='audio'){img.alt='Archivo de audio';img.style.background='linear-gradient(135deg,#7652a8,#d36cce)';}else{img.src='https://i.ytimg.com/vi/'+t.id+'/mqdefault.jpg';img.alt='Miniatura de YouTube';}
+  const info=document.createElement('div');const title=document.createElement('div');title.className='title';title.textContent=t.title||'Video de YouTube';const small=document.createElement('small');small.textContent=t.type==='audio'?'Archivo de audio':'YouTube';info.append(title,small);
   const play=document.createElement('button');play.textContent='▶';play.setAttribute('aria-label','Reproducir');play.onclick=()=>playTrack(i);
-  const del=document.createElement('button');del.className='delete';del.textContent='✕';del.setAttribute('aria-label','Eliminar');del.onclick=()=>{if(i===current){if(playerReady)player.stopVideo();current=-1;$('nowTitle').textContent='Elige una canción';}else if(i<current)current--;p.tracks.splice(i,1);save();render();};
+  const del=document.createElement('button');del.className='delete';del.textContent='✕';del.setAttribute('aria-label','Eliminar');del.onclick=()=>{if(i===current){stopCurrent();current=-1;$('nowTitle').textContent='Elige una canción';}else if(i<current)current--;p.tracks.splice(i,1);save();render();};
   row.append(img,info,play,del);list.append(row);
  });
  save();
@@ -99,31 +111,46 @@ $('addForm').onsubmit=e=>{
  const p=active();if(p.tracks.some(t=>t.id===id)){toast('Ese video ya está en esta playlist.');return;}
  p.tracks.push({id,title:'Video de YouTube'});$('url').value='';render();toast('¡Video añadido a '+p.name+'!');
 };
-function playTrack(index){
- const t=active().tracks[index];if(!t)return;
- current=index;$('nowTitle').textContent=t.title||'Video de YouTube';$('nowStatus').textContent='Cargando video…';render();
- if(!playerReady){$('videoHint').textContent='Conectando con YouTube… Si no aparece, revisa tu conexión y abre PicUp desde una dirección HTTPS.';toast('YouTube todavía está iniciando. Espera unos segundos y vuelve a tocar ▶.');return;}
- $('videoHint').textContent='Solicitando video a YouTube…';player.loadVideoById({videoId:t.id});$('toggle').textContent='Ⅱ Pausar';
+
+const audio=$('audio');let audioDb=null,audioUrl=null,currentTrack=null,repeatMode=0,shuffleOn=false;
+function dbOpen(){return new Promise((ok,no)=>{const r=indexedDB.open('PicUpAudioDB',1);r.onupgradeneeded=()=>r.result.createObjectStore('files');r.onsuccess=()=>{audioDb=r.result;ok(audioDb)};r.onerror=()=>no(r.error);});}
+async function dbPut(id,file){const db=audioDb||await dbOpen();return new Promise((ok,no)=>{const tx=db.transaction('files','readwrite');tx.objectStore('files').put(file,id);tx.oncomplete=ok;tx.onerror=()=>no(tx.error);});}
+async function dbGet(id){const db=audioDb||await dbOpen();return new Promise((ok,no)=>{const r=db.transaction('files').objectStore('files').get(id);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error);});}
+function fmt(n){if(!Number.isFinite(n))return'0:00';return Math.floor(n/60)+':'+String(Math.floor(n%60)).padStart(2,'0');}
+function setPlayIcon(on){$('toggle').textContent=on?'Ⅱ':'▶';}
+function stopCurrent(){audio.pause();audio.removeAttribute('src');audio.load();if(playerReady)try{player.stopVideo()}catch(e){}if(audioUrl){URL.revokeObjectURL(audioUrl);audioUrl=null;}currentTrack=null;setPlayIcon(false);}
+function addFavorite(){if(!currentTrack){toast('Primero elige una canción.');return;}const f=data.playlists.find(x=>x.id==='favorites');const id=t=>t.type==='audio'?t.fileId:t.id;if(!f.tracks.some(t=>t.type===currentTrack.type&&id(t)===id(currentTrack))){f.tracks.push({...currentTrack});save();render();toast('¡Añadida a Favoritos!');}else toast('Ya está en Favoritos.');$('favorite').textContent='♥';}
+$('audioFiles').onchange=async e=>{try{await dbOpen();for(const file of Array.from(e.target.files||[])){if(!file.type.startsWith('audio/'))continue;const fileId='aud-'+Date.now()+'-'+Math.random().toString(36).slice(2);await dbPut(fileId,file);active().tracks.push({type:'audio',fileId,title:file.name.replace(/\.[^.]+$/,''),artist:'Archivo local'});}save();render();toast('¡Archivos añadidos!');}catch(err){toast('No se pudieron guardar: '+err.message);}e.target.value='';};
+$('volume').oninput=()=>{audio.volume=Number($('volume').value);if(playerReady)try{player.setVolume(Math.round(audio.volume*100))}catch(e){}};
+$('seek').oninput=()=>{const f=Number($('seek').value)/1000;if(currentTrack?.type==='audio'&&audio.duration)audio.currentTime=f*audio.duration;else if(playerReady&&currentTrack)try{player.seekTo(f*player.getDuration(),true)}catch(e){}};
+$('shuffle').onclick=()=>{shuffleOn=!shuffleOn;$('shuffle').classList.toggle('active-mode',shuffleOn);toast(shuffleOn?'Aleatorio activado':'Aleatorio desactivado');};
+$('repeat').onclick=()=>{repeatMode=(repeatMode+1)%3;$('repeat').classList.toggle('active-mode',repeatMode>0);$('repeat').textContent=repeatMode===2?'🔂':'🔁';toast(['Repetición desactivada','Repetir playlist','Repetir canción'][repeatMode]);};
+$('favorite').onclick=addFavorite;
+function updateProgress(){if(currentTrack?.type==='audio'&&audio.duration){$('seek').value=Math.round(audio.currentTime/audio.duration*1000);$('elapsed').textContent=fmt(audio.currentTime);$('duration').textContent=fmt(audio.duration);}else if(playerReady&&currentTrack){try{const d=player.getDuration(),t=player.getCurrentTime();if(d){$('seek').value=Math.round(t/d*1000);$('elapsed').textContent=fmt(t);$('duration').textContent=fmt(d)}}catch(e){}}}
+audio.addEventListener('timeupdate',updateProgress);audio.addEventListener('loadedmetadata',updateProgress);audio.addEventListener('play',()=>setPlayIcon(true));audio.addEventListener('pause',()=>setPlayIcon(false));
+audio.addEventListener('ended',()=>{if(repeatMode===2){audio.currentTime=0;audio.play()}else if(repeatMode===1&&current===active().tracks.length-1)playTrack(0);else step(1)});
+setInterval(updateProgress,500);
+
+async function playTrack(index){
+ const t=active().tracks[index];if(!t)return;stopCurrent();current=index;currentTrack=t;$('nowTitle').textContent=t.title||'Canción';$('nowStatus').textContent=t.type==='audio'?'Cargando archivo…':'Cargando YouTube…';$('elapsed').textContent='0:00';$('duration').textContent='0:00';$('seek').value=0;render();
+ if(t.type==='audio'){try{const file=await dbGet(t.fileId);if(!file)throw new Error('No se encontró el archivo.');audioUrl=URL.createObjectURL(file);audio.src=audioUrl;audio.volume=Number($('volume').value);await audio.play();$('nowStatus').textContent='Reproduciendo archivo de audio';if('mediaSession'in navigator&&'MediaMetadata'in window){navigator.mediaSession.metadata=new MediaMetadata({title:t.title,artist:t.artist||'Archivo local',album:'PicUp'});navigator.mediaSession.setActionHandler('play',()=>audio.play());navigator.mediaSession.setActionHandler('pause',()=>audio.pause());navigator.mediaSession.setActionHandler('previoustrack',()=>step(-1));navigator.mediaSession.setActionHandler('nexttrack',()=>step(1));}}catch(e){$('nowStatus').textContent='No se pudo reproducir';toast(e.message)}return;}
+ if(!playerReady){$('videoHint').textContent='Conectando con YouTube… espera unos segundos.';toast('YouTube todavía está iniciando.');return;}
+ $('videoHint').textContent='Solicitando video a YouTube…';player.loadVideoById({videoId:t.id});setPlayIcon(true);
 }
-function step(dir){const tracks=active().tracks;if(!tracks.length)return;playTrack((current+dir+tracks.length)%tracks.length);}
-$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);
-$('toggle').onclick=()=>{
- if(!playerReady){$('videoHint').textContent='El reproductor todavía no está listo. Comprueba que PicUp esté abierto desde HTTPS y que tengas internet.';toast('El reproductor de YouTube todavía está iniciando.');return;}
- if(current<0){if(active().tracks.length)playTrack(0);else toast('Añade un video primero.');return;}
- const state=player.getPlayerState();
- if(state===YT.PlayerState.PLAYING){player.pauseVideo();$('toggle').textContent='▶ Reanudar';}
- else{player.playVideo();$('toggle').textContent='Ⅱ Pausar';}
-};
+function step(dir){const tracks=active().tracks;if(!tracks.length)return;let n;if(shuffleOn&&tracks.length>1){do{n=Math.floor(Math.random()*tracks.length)}while(n===current)}else n=(current+dir+tracks.length)%tracks.length;playTrack(n);}
+$('prev').onclick=()=>{if(currentTrack?.type==='audio'&&audio.currentTime>3){audio.currentTime=0;return;}step(-1)};
+$('next').onclick=()=>step(1);
+$('toggle').onclick=()=>{if(current<0){if(active().tracks.length)playTrack(0);else toast('Añade una canción primero.');return;}if(currentTrack?.type==='audio'){audio.paused?audio.play():audio.pause();return;}if(!playerReady){toast('YouTube todavía está iniciando.');return;}if(player.getPlayerState()===YT.PlayerState.PLAYING){player.pauseVideo();setPlayIcon(false)}else{player.playVideo();setPlayIcon(true)}};
 const recs=[['🌙 Lofi para relajarte','Beats tranquilos','lofi hip hop radio chill beats'],['⚡ Electrónica','Ritmos electrónicos','electronic music mix'],['🕹️ Chiptune','Sonido arcade y 8-bit','chiptune video game music'],['✨ Música de videojuegos','Soundtracks épicos','epic video game soundtrack'],['🎸 Rock alternativo','Guitarras y energía','alternative rock mix'],['🌌 Ambient','Paisajes sonoros','ambient music mix']];
 recs.forEach(([title,desc,q])=>{const b=document.createElement('button');b.className='rec';const strong=document.createElement('b');strong.textContent=title;const span=document.createElement('span');span.textContent=desc;b.append(strong,span);b.onclick=()=>window.open('https://www.youtube.com/results?search_query='+encodeURIComponent(q),'_blank','noopener');$('recs').append(b);});
 window.onYouTubeIframeAPIReady=()=>{
  player=new YT.Player('ytplayer',{width:'200',height:'200',videoId:'',playerVars:{playsinline:1,controls:1,rel:0},events:{
   onReady:()=>{playerReady=true;$('videoHint').textContent='Reproductor conectado. Elige una canción de tu lista.';},
-  onStateChange:e=>{if(e.data===YT.PlayerState.ENDED)step(1);if(e.data===YT.PlayerState.PLAYING){$('toggle').textContent='Ⅱ Pausar';$('nowStatus').textContent='Reproduciendo con YouTube';$('videoHint').textContent='Reproduciendo video desde YouTube.';}if(e.data===YT.PlayerState.PAUSED){$('toggle').textContent='▶ Reanudar';$('videoHint').textContent='Video pausado.';}if(e.data===YT.PlayerState.BUFFERING){$('videoHint').textContent='YouTube está cargando el video…';}},
+  onStateChange:e=>{if(e.data===YT.PlayerState.ENDED){if(repeatMode===2){player.seekTo(0,true);player.playVideo()}else if(repeatMode===1&&current===active().tracks.length-1)playTrack(0);else step(1)}if(e.data===YT.PlayerState.PLAYING){setPlayIcon(true);$('nowStatus').textContent='Reproduciendo con YouTube';$('videoHint').textContent='Reproduciendo video desde YouTube.';}if(e.data===YT.PlayerState.PAUSED){setPlayIcon(false);$('videoHint').textContent='Video pausado.';}if(e.data===YT.PlayerState.BUFFERING){$('videoHint').textContent='YouTube está cargando el video…';}},
   onError:e=>{const msgs={2:'El enlace o identificador del video no es válido.',5:'Este video no se puede reproducir en el reproductor HTML5.',100:'El video fue eliminado o es privado.',101:'El propietario no permite reproducir este video en sitios externos.',150:'El propietario no permite reproducir este video en sitios externos.',153:'YouTube no recibió información de referencia del sitio. Abre PicUp desde una dirección HTTPS, no como archivo local.'};const msg=msgs[e.data]||('YouTube devolvió el error '+e.data+'.');$('nowStatus').textContent='No se pudo reproducir';$('videoHint').textContent=msg;toast(msg);}
  }});
 };
 const api=document.createElement('script');api.src='https://www.youtube.com/iframe_api';api.onerror=()=>{$('videoHint').textContent='No se pudo cargar el reproductor de YouTube. Revisa tu conexión o bloqueo de red.';toast('No se pudo cargar YouTube.');};document.head.append(api);
-render();
+audio.volume=.8;render();
 </script>
 </body></html>
